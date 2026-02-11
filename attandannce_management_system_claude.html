@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .date-display {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="date"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.3s;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+        }
+
+        .btn-secondary {
+            background: #764ba2;
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #653a8a;
+        }
+
+        .attendance-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .attendance-table th,
+        .attendance-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .attendance-table th {
+            background: #f5f5f5;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .attendance-table tr:hover {
+            background: #f9f9f9;
+        }
+
+        .status-present {
+            color: #4caf50;
+            font-weight: 600;
+        }
+
+        .status-absent {
+            color: #f44336;
+            font-weight: 600;
+        }
+
+        .status-leave {
+            color: #ff9800;
+            font-weight: 600;
+        }
+
+        .delete-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .delete-btn:hover {
+            background: #d32f2f;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📋 Attendance Management System</h1>
+            <div class="date-display" id="currentDate"></div>
+        </header>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="totalPresent">0</div>
+                <div class="stat-label">Present Today</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalAbsent">0</div>
+                <div class="stat-label">Absent Today</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalEmployees">0</div>
+                <div class="stat-label">Total Employees</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="card">
+                <h2>Mark Attendance</h2>
+                <form id="attendanceForm">
+                    <div class="form-group">
+                        <label for="employeeName">Employee Name</label>
+                        <input type="text" id="employeeName" placeholder="Enter name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="employeeId">Employee ID</label>
+                        <input type="text" id="employeeId" placeholder="Enter ID" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="attendanceDate">Date</label>
+                        <input type="date" id="attendanceDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="status">Status</label>
+                        <select id="status" required>
+                            <option value="">Select Status</option>
+                            <option value="Present">Present</option>
+                            <option value="Absent">Absent</option>
+                            <option value="Leave">On Leave</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn">Mark Attendance</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>Quick Actions</h2>
+                <div class="form-group">
+                    <label for="filterDate">Filter by Date</label>
+                    <input type="date" id="filterDate">
+                </div>
+                <button class="btn" onclick="filterByDate()">Filter Records</button>
+                <button class="btn btn-secondary" onclick="showAllRecords()">Show All Records</button>
+                <button class="btn btn-secondary" onclick="clearAllData()">Clear All Data</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Attendance Records</h2>
+            <div id="recordsContainer">
+                <div class="empty-state">No attendance records yet. Start marking attendance!</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize
+        let attendanceRecords = JSON.parse(localStorage.getItem('attendanceRecords')) || [];
+        
+        // Set current date
+        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        // Set today's date as default
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('attendanceDate').value = today;
+        document.getElementById('filterDate').value = today;
+
+        // Form submission
+        document.getElementById('attendanceForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const record = {
+                id: Date.now(),
+                name: document.getElementById('employeeName').value,
+                employeeId: document.getElementById('employeeId').value,
+                date: document.getElementById('attendanceDate').value,
+                status: document.getElementById('status').value,
+                timestamp: new Date().toLocaleString()
+            };
+
+            attendanceRecords.push(record);
+            localStorage.setItem('attendanceRecords', JSON.stringify(attendanceRecords));
+            
+            // Reset form
+            this.reset();
+            document.getElementById('attendanceDate').value = today;
+            
+            // Show success message
+            alert('Attendance marked successfully!');
+            
+            // Refresh display
+            displayRecords(attendanceRecords);
+            updateStats();
+        });
+
+        // Display records
+        function displayRecords(records) {
+            const container = document.getElementById('recordsContainer');
+            
+            if (records.length === 0) {
+                container.innerHTML = '<div class="empty-state">No attendance records found.</div>';
+                return;
+            }
+
+            let html = `
+                <table class="attendance-table">
+                    <thead>
+                        <tr>
+                            <th>Employee Name</th>
+                            <th>Employee ID</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Marked At</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            records.forEach(record => {
+                const statusClass = `status-${record.status.toLowerCase()}`;
+                html += `
+                    <tr>
+                        <td>${record.name}</td>
+                        <td>${record.employeeId}</td>
+                        <td>${new Date(record.date).toLocaleDateString()}</td>
+                        <td class="${statusClass}">${record.status}</td>
+                        <td>${record.timestamp}</td>
+                        <td><button class="delete-btn" onclick="deleteRecord(${record.id})">Delete</button></td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // Update statistics
+        function updateStats() {
+            const todayRecords = attendanceRecords.filter(r => r.date === today);
+            const presentCount = todayRecords.filter(r => r.status === 'Present').length;
+            const absentCount = todayRecords.filter(r => r.status === 'Absent').length;
+            
+            // Get unique employees
+            const uniqueEmployees = new Set(attendanceRecords.map(r => r.employeeId));
+            
+            document.getElementById('totalPresent').textContent = presentCount;
+            document.getElementById('totalAbsent').textContent = absentCount;
+            document.getElementById('totalEmployees').textContent = uniqueEmployees.size;
+        }
+
+        // Filter by date
+        function filterByDate() {
+            const filterDate = document.getElementById('filterDate').value;
+            if (!filterDate) {
+                alert('Please select a date to filter');
+                return;
+            }
+            
+            const filtered = attendanceRecords.filter(r => r.date === filterDate);
+            displayRecords(filtered);
+        }
+
+        // Show all records
+        function showAllRecords() {
+            displayRecords(attendanceRecords);
+        }
+
+        // Delete record
+        function deleteRecord(id) {
+            if (confirm('Are you sure you want to delete this record?')) {
+                attendanceRecords = attendanceRecords.filter(r => r.id !== id);
+                localStorage.setItem('attendanceRecords', JSON.stringify(attendanceRecords));
+                displayRecords(attendanceRecords);
+                updateStats();
+            }
+        }
+
+        // Clear all data
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all attendance data? This cannot be undone!')) {
+                attendanceRecords = [];
+                localStorage.removeItem('attendanceRecords');
+                displayRecords(attendanceRecords);
+                updateStats();
+                alert('All data cleared successfully!');
+            }
+        }
+
+        // Initial display
+        displayRecords(attendanceRecords);
+        updateStats();
+    </script>
+</body>
+</html>

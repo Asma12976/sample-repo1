@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Attendance Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #74ebd5, #ACB6E5);
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            margin: auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        input {
+            padding: 8px;
+            width: 200px;
+        }
+
+        button {
+            padding: 8px 12px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .add-btn {
+            background: #28a745;
+            color: white;
+        }
+
+        .present {
+            background: #007bff;
+            color: white;
+        }
+
+        .absent {
+            background: #dc3545;
+            color: white;
+        }
+
+        .delete {
+            background: #6c757d;
+            color: white;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .summary {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>Attendance Management System</h1>
+
+<div class="container">
+
+    <input type="text" id="studentName" placeholder="Enter Student Name">
+    <button class="add-btn" onclick="addStudent()">Add Student</button>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="studentList"></tbody>
+    </table>
+
+    <div class="summary">
+        Total: <span id="total">0</span> |
+        Present: <span id="presentCount">0</span> |
+        Absent: <span id="absentCount">0</span>
+    </div>
+
+</div>
+
+<script>
+    let total = 0;
+    let present = 0;
+    let absent = 0;
+
+    function addStudent() {
+        let name = document.getElementById("studentName").value.trim();
+
+        if (name === "") {
+            alert("Please enter student name");
+            return;
+        }
+
+        let table = document.getElementById("studentList");
+
+        let row = table.insertRow();
+
+        let cell1 = row.insertCell(0);
+        let cell2 = row.insertCell(1);
+        let cell3 = row.insertCell(2);
+
+        cell1.innerHTML = name;
+        cell2.innerHTML = "Not Marked";
+
+        cell3.innerHTML = `
+            <button class="present" onclick="markPresent(this)">Present</button>
+            <button class="absent" onclick="markAbsent(this)">Absent</button>
+            <button class="delete" onclick="deleteStudent(this)">Delete</button>
+        `;
+
+        total++;
+        updateSummary();
+
+        document.getElementById("studentName").value = "";
+    }
+
+    function markPresent(btn) {
+        let row = btn.parentElement.parentElement;
+        let statusCell = row.cells[1];
+
+        if (statusCell.innerHTML !== "Present") {
+            if (statusCell.innerHTML === "Absent") {
+                absent--;
+            }
+            present++;
+        }
+
+        statusCell.innerHTML = "Present";
+        updateSummary();
+    }
+
+    function markAbsent(btn) {
+        let row = btn.parentElement.parentElement;
+        let statusCell = row.cells[1];
+
+        if (statusCell.innerHTML !== "Absent") {
+            if (statusCell.innerHTML === "Present") {
+                present--;
+            }
+            absent++;
+        }
+
+        statusCell.innerHTML = "Absent";
+        updateSummary();
+    }
+
+    function deleteStudent(btn) {
+        let row = btn.parentElement.parentElement;
+        let status = row.cells[1].innerHTML;
+
+        if (status === "Present") present--;
+        if (status === "Absent") absent--;
+
+        total--;
+        row.remove();
+
+        updateSummary();
+    }
+
+    function updateSummary() {
+        document.getElementById("total").innerText = total;
+        document.getElementById("presentCount").innerText = present;
+        document.getElementById("absentCount").innerText = absent;
+    }
+</script>
+
+</body>
+</html>
